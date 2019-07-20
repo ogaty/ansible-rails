@@ -1,0 +1,17 @@
+---
+  - name: nodejs repo get
+    get_url:
+      url: https://rpm.nodesource.com/setup_8.x
+      dest: /tmp/nodejs-setup.sh
+      mode: 0755
+
+  - name: nodejs repo install
+    shell: /tmp/nodejs-setup.sh
+
+  - name: nodejs repo install
+    file: path=/tmp/nodejs-setup.sh state=absent
+
+  - name: nodejs install
+    yum:
+      name: nodejs
+      state: latest

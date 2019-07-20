@@ -1,0 +1,4 @@
+---
+  - name: install epel
+    command: amazon-linux-extras install epel -y
+

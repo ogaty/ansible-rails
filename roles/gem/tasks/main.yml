@@ -1,0 +1,26 @@
+- name: Install rails.
+  gem:
+    name: rails
+    state: present
+    version: 5.1.7
+    user_install: no
+    executable: /home/ec2-user/.rbenv/shims/gem
+  become: true
+  become_user: "ec2-user"
+
+- name: Install devel
+  yum:
+    name: libsqlite3x-devel
+    state: present
+  become: true
+
+- name: Install gems.
+  gem:
+    name: "{{ item }}"
+    state: present
+    user_install: no
+    executable: /home/ec2-user/.rbenv/shims/gem
+  become: true
+  become_user: "ec2-user"
+  with_items:
+    - sqlite3

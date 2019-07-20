@@ -1,0 +1,72 @@
+---
+- name: Check rbenv
+  shell: /home/ec2-user/.rbenv/bin/rbenv --version
+  register: rbenv_exists
+  changed_when: False
+  ignore_errors: yes
+  become: no
+
+- name: Check installed ruby version
+  shell: /home/ec2-user/.rbenv/bin/rbenv versions | grep 2.5.5
+  register: has_ruby_version
+  changed_when: False
+  ignore_errors: yes
+  become: no
+
+- name: Check ruby version
+  shell: /home/ec2-user/.rbenv/bin/rbenv version | grep 2.5.5
+  register: is_ruby_version
+  changed_when: False
+  ignore_errors: yes
+  become: no
+
+- name: Install ruby requiring packages
+  yum:
+    name:
+      - bzip2
+      - gcc*
+      - openssl-devel
+      - readline-devel
+      - zlib-devel
+  become: yes
+  when: has_ruby_version is failed
+
+- name: install rbenv
+  git:
+    repo: https://github.com/sstephenson/rbenv.git
+    dest: "/home/ec2-user/.rbenv"
+  become: no
+  when: rbenv_exists is failed
+
+- name: install ruby-build
+  git:
+    repo: https://github.com/sstephenson/ruby-build.git
+    dest: "/home/ec2-user/.rbenv/plugins/ruby-build"
+  become: no
+  when: rbenv_exists is failed
+
+- name: set env
+  blockinfile:
+    dest: /home/ec2-user/.bash_profile
+    insertafter: '^PATH=\$PATH:\$HOME/bin$'
+    content: |
+      export RBENV_ROOT=/home/ec2-user/.rbenv
+      export PATH="$RBENV_ROOT/bin:$PATH"
+      eval "$(rbenv init -)"
+  become: no
+  when: rbenv_exists is failed
+
+- name: install ruby
+  shell: bash -lc "rbenv install -v 2.5.5"
+  become: no
+  when: has_ruby_version is failed
+
+- name: rbenv rehash
+  shell: bash -lc "rbenv rehash 2.5.5"
+  become: no
+  when: has_ruby_version is failed
+
+- name: Set default ruby version
+  shell: bash -lc "rbenv global 2.5.5"
+  become: no
+  when: is_ruby_version is failed
